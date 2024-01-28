@@ -27,7 +27,7 @@
 
 
 uniform mat4 mvp_matrix;
-
+uniform mat4 model_rotate;
 
 layout (location=0) in vec4 a_vertex;
 layout (location=1) in vec3 a_color;
@@ -35,7 +35,7 @@ out vec3 v_color;
 
 void main() {
   // map the vertex position into normalized device coordinates
-  gl_Position = mvp_matrix * a_vertex;
+  gl_Position = mvp_matrix * model_rotate * a_vertex;
 
   // Pass on the color to the fragment shader
   v_color = a_color;

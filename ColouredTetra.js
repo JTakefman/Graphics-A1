@@ -49,6 +49,10 @@ var SPEED;
 // Initialize time of last rotation update
 var LAST_FRAME = Date.now();
 var VAO;
+var VAO2;
+
+var n = 18;
+var n2 = 18;
 
 function main() {
   // Retrieve <canvas> element
@@ -105,13 +109,6 @@ function start(gl) {
     console.log('Failed to intialize shaders.');
     return;
   }
-
-  // Write the positions of vertices to a vertex shader
-  var n = initVertexBuffers(gl);
-  if (n < 0) {
-    console.log('Failed to set the positions of the vertices');
-    return;
-  }
   // Must enable depth test for proper 3D display
   gl.enable(gl.DEPTH_TEST);
   // Set clear color - state info	
@@ -127,7 +124,7 @@ function start(gl) {
 
   // Create the matrix to set the projection matrix
   var projMatrix = glMatrix.mat4.create();
-  glMatrix.mat4.ortho(projMatrix,-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
+  glMatrix.mat4.ortho(projMatrix,-5, 5, -5, 5, -5, 5.0);
 
   // Current axis angle
   var axisAngle = 0.0;
@@ -146,14 +143,14 @@ function start(gl) {
     currentAngle = animate(currentAngle, SPEED, elapsed );  // Update the rotation angle
     axisAngle = animate(axisAngle, SPEED/7.0, elapsed );  // Update the axis angle
     LAST_FRAME = now;
-    draw(gl, n, currentAngle, axisAngle, projMatrix, u_mvp_matrix); // Draw the triangle
+    draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix); // Draw the triangle
     requestAnimationFrame(tick);   // Request that the browser calls tick
   };
   tick();
 }
 
 
-function initVertexBuffers(gl) {
+function initVertexBuffers(gl, vertices, vertices2) {
   // Store vertices and color cords interleaved
   // 0 -- 2 -- 0
   // |  / |  / |
@@ -163,33 +160,6 @@ function initVertexBuffers(gl) {
   VAO = gl.createVertexArray();
   gl.bindVertexArray(VAO);
 
-  var vertices = new Float32Array([
-    //Build base
-    -1,-1,1, 1, 1, 1, // top left
-    1,-1,1, 1, 1, 1, // top right
-    1,-1,-1, 1, 1, 1, // bottom right
-    //
-    1,-1,-1, 1, 1, 1, // bottom right
-    -1,-1,1, 1, 1, 1, // top left
-    -1,-1,-1, 1, 1, 1, // bottomleft
-    //Connect high
-    -1,-1,-1, 1, 0, 0, // bottomleft
-    -1,-1,1, 1, 0, 0, // top left
-    0,1,0,1,0,0, //high
-    //
-    0,1,0,0,1,0, //high
-    -1,-1,1, 0, 1, 0, // top left
-    1,-1,1, 0, 1, 0, // top right
-    //
-    0,1,0,0,0,1, //high
-    -1,-1,-1, 0, 0, 1, // bottomleft
-    1,-1,-1, 0, 0, 1, // bottom right
-    //
-    0,1,0,1,0,1, //high
-    1,-1,-1, 1, 0, 1, // bottom right
-    1,-1,1, 1, 0, 1, // top right
-  ]);
-  var n = 18; // The number of vertices
   var fsize = vertices.BYTES_PER_ELEMENT;
 
   // Create a buffer object
@@ -218,27 +188,136 @@ function initVertexBuffers(gl) {
   gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 6*fsize,  fsize * 3);
   gl.enableVertexAttribArray(a_color);
 
-  return n;
+  gl.bindVertexArray(null);
+
+
+  VAO2 = gl.createVertexArray();
+  gl.bindVertexArray(VAO2);
+
+  var fsize = vertices.BYTES_PER_ELEMENT;
+
+  // Create a buffer object
+  var vertexColorBuffer = gl.createBuffer();
+  if (!vertexColorBuffer) {
+    console.log('Failed to create the buffer object');
+    return -1;
+  }
+  // Bind the buffer object to target
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+  // Write data into the buffer object
+  gl.bufferData(gl.ARRAY_BUFFER, vertices2, gl.STATIC_DRAW);
+
+  var a_vertex = gl.getAttribLocation(gl.program, 'a_vertex');
+  if (a_vertex < 0) {
+    console.log('Failed to get the storage location of a_vertex');
+    return -1;
+  }
+  // 6 entries per vertex: x y z r g b
+  gl.vertexAttribPointer(a_vertex, 3, gl.FLOAT, false, 6*fsize,  fsize * 0);
+  gl.enableVertexAttribArray(a_vertex);
+
+  // Todo: Get the storage location of a_color, assign buffer and enable
+
+  var a_color = gl.getAttribLocation(gl.program, 'a_color');
+  gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 6*fsize,  fsize * 3);
+  gl.enableVertexAttribArray(a_color);
+
+  return 0;
 }
 
 
-function draw(gl, n, currentAngle, axisAngle, projMatrix, u_mvp_matrix) {
+function draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix) {
   // Combine model and projection matrix in js -- could also multiply in shader
   // View matrix is still identity
   var mvpMatrix = glMatrix.mat4.clone(projMatrix);
   // Set the rotation matrix
-  glMatrix.mat4.rotateY(mvpMatrix, mvpMatrix, glMatrix.glMatrix.toRadian(axisAngle));
-  glMatrix.mat4.rotateX(mvpMatrix, mvpMatrix, glMatrix.glMatrix.toRadian(currentAngle));
+  //glMatrix.mat4.rotateY(mvpMatrix, mvpMatrix, glMatrix.glMatrix.toRadian(axisAngle));
  
+
   // Pass the mvp matrix to the vertex shader
   gl.uniformMatrix4fv(u_mvp_matrix, false, mvpMatrix );
 
   // Clear <canvas> - both color and depth
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  var vertices = new Float32Array([
+    //Build base
+    -1,-1,1, 1, 1, 1, // top left
+    1,-1,1, 1, 1, 1, // top right
+    1,-1,-1, 1, 1, 1, // bottom right
+    //
+    1,-1,-1, 1, 1, 1, // bottom right
+    -1,-1,1, 1, 1, 1, // top left
+    -1,-1,-1, 1, 1, 1, // bottomleft
+    //Connect high
+    -1,-1,-1, 1, 0, 0, // bottomleft
+    -1,-1,1, 1, 0, 0, // top left
+    0,1,0,1,0,0, //high
+    //
+    0,1,0,0,1,0, //high
+    -1,-1,1, 0, 1, 0, // top left
+    1,-1,1, 0, 1, 0, // top right
+    //
+    0,1,0,0,0,1, //high
+    -1,-1,-1, 0, 0, 1, // bottomleft
+    1,-1,-1, 0, 0, 1, // bottom right
+    //
+    0,1,0,1,0,1, //high
+    1,-1,-1, 1, 0, 1, // bottom right
+    1,-1,1, 1, 0, 1, // top right
+  ]);
+
+  //Cat vertices
+  var vertices2 = new Float32Array([
+    3,3,3, 1, 0.5, 0, //Bottom Face
+    2,1,3, 1, 0.5, 0, // 
+    4,1,3, 1, 0.5, 0, // 
+    //
+    3,3,3, 1, 0.5, 0, //Left Face
+    2,1,3, 1, 0.5, 0, // 
+    1,3,3, 1, 0.5, 0, // 
+    //
+    3,3,3, 1, 0.5, 0, //Right Face
+    5,3,3, 1, 0.5, 0, // 
+    4,1,3, 1, 0.5, 0, // 
+    //
+    2,5, 3, 1, 1, 1, //Left Ear
+    1, 3, 3, 1, 1, 1, // 
+    3, 3, 3, 1, 1, 1, // 
+    //
+    2,5, 3, 1, 1, 1, //Right Ear
+    1, 3, 3, 1, 1, 1, // 
+    3, 3, 3, 1, 1, 1, // 
+    4,5, 3, 1, 1, 1, //Left Ear
+    3, 3, 3, 1, 1, 1, // 
+    5, 3, 3, 1, 1, 1, // 
+  ]);
+
+
+  initVertexBuffers(gl, vertices, vertices2);
+   
+  var pyramidvec = glMatrix.vec3.fromValues(0,1,0);
+
+  var rotateMatrix = glMatrix.mat4.create();
+  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_rotate');
+  glMatrix.mat4.rotate(rotateMatrix, rotateMatrix, glMatrix.glMatrix.toRadian(currentAngle), pyramidvec);
+  gl.uniformMatrix4fv(u_rotate_matrix, false, rotateMatrix);
+
   gl.bindVertexArray(VAO);
   // Draw the rectangle
   gl.drawArrays(gl.TRIANGLES, 0, n);
+
+  var catvec = glMatrix.vec3.fromValues(1,1,0);
+  var rotateMatrix = glMatrix.mat4.create();
+  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_rotate');
+  glMatrix.mat4.rotate(rotateMatrix, rotateMatrix, glMatrix.glMatrix.toRadian(currentAngle), catvec);
+  gl.uniformMatrix4fv(u_rotate_matrix, false, rotateMatrix);
+
+
+  
+  gl.bindVertexArray(VAO2);
+  // Draw the rectangle
+  gl.drawArrays(gl.TRIANGLES, 0, n2);
 }
 
 
@@ -260,7 +339,7 @@ function keydown(ev, n, gl, currentAngle, projMatrix, u_mvp_matrix) {
     SPEED -= 2.0;
     break;
   }
-  draw(gl, n, currentAngle, projMatrix, u_mvp_matrix);
+  draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix);
 }
 
 function setDefault() {
