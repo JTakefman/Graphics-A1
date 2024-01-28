@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+ <!-- 
+ ==========================================================================
+ $Id: ColouredTetra.html,v 1.2 2019/02/14 04:21:52 jlang Exp $
+ Simple html page to experiment with Three.js 
+ ==========================================================================
+ (C)opyright:
+
+   Jochen Lang
+   EECS, University of Ottawa
+   800 King Edward Ave.
+   Ottawa, On., K1N 6N5
+   Canada.
+   http:www.eecs.uottawa.ca
+
+ Creator: jlang (Jochen Lang)
+ Email:   jlang@uottawa.ca
+ ==========================================================================
+ $Log: ColouredTetra.html,v $
+ Revision 1.2  2019/02/14 04:21:52  jlang
+ Replaced cuon_matrix with glMatrix.
+ Created starter code.
+
+ Revision 1.1  2019/02/14 02:43:08  jlang
+ Solution to lab 4.
+
+ ========================================================================== 
+-->
+<html
+ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSI4130 Laboratory 4</title>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            /* margin: 0; */
+            overflow: hidden;
+			background-color: #175d7e;
+			color: #cccccc;
+        }
+		a:link {
+			color: #33ccff;
+		}	
+		a:visited {
+			color: #ccffff;
+		}
+    </style>
+</head>
+  <body onload="main()">
+    <h1>Coloured Tetrahedron</h1>
+    <P>
+      The code is heavily based on
+      the <span style="text-decoration: underline;font-weight:bold;">
+	<font color="#ff0000">WebGL Programming
+     Guide</font></b></span> by <span style="text-decoration:
+     underline;font-weight: bold;">Kouichi Matsuda and Rodger
+     Lea</span>. You can find more information about the book and the
+     source code on their <span style="font-weight: bold;">
+     <A href="https://sites.google.com/site/webglbook/">webpage</A></span>. The
+     code posted here is with the generours permission by the authors. 
+    </P>
+	<P>
+	This demo uses a VAO and webGL 2
+	</P>
+    <canvas id="webgl" width="512" height="512">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <hr width="100%">     
+    <table>
+      <tbody>
+	<tr>
+	  <td>
+	    Use up/down arrows to change speed.
+	  </td>
+	  <td>
+	    <button type="button" onclick="setDefault()">reset</button>
+	  </td>
+	</tr>
+	<tr>
+	  <td style="text-align:right">
+	    <button type="button" onclick="faster()">faster</button>
+	  </td>
+	  <td>
+	    <button type="button" onclick="slower()">slower</button>
+	  </td>
+	</tr>	
+      </tbody>
+    </table>
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+	<script src="../../node_modules/gl-matrix/gl-matrix.js"></script>
+    <script src="ColouredTetra.js"></script>
+</P>
+<P>
+  <hr width="100%"> 
+</br>
+&copy; <a href="https://www.site.uottawa.ca/~jlang/">Jochen Lang</a> 
+</body>
+</html>
+</P>
+  </body>
+</html>
