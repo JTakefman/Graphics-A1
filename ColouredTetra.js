@@ -269,29 +269,27 @@ function draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix) {
 
   //Cat vertices
   var vertices2 = new Float32Array([
-    3,3,3, 1, 0.5, 0, //Bottom Face
-    2,1,3, 1, 0.5, 0, // 
-    4,1,3, 1, 0.5, 0, // 
+    0,1,0, 1, 0.5, 0, //Bottom Face
+    -1,-1,0, 1, 0.5, 0, // 
+    1,-1,0, 1, 0.5, 0, // 
     //
-    3,3,3, 1, 0.5, 0, //Left Face
-    2,1,3, 1, 0.5, 0, // 
-    1,3,3, 1, 0.5, 0, // 
+    0,1,0,   1, 0.5, 0, //Left Face
+    -1,-1,0, 1, 0.5, 0, // 
+    -2,1,0,  1, 0.5, 0, // 
     //
-    3,3,3, 1, 0.5, 0, //Right Face
-    5,3,3, 1, 0.5, 0, // 
-    4,1,3, 1, 0.5, 0, // 
+    0,1,0, 1, 0.5, 0, //Right Face
+    2,1,0, 1, 0.5, 0, // 
+    1,-1,0, 1, 0.5, 0, // 
     //
-    2,5, 3, 1, 1, 1, //Left Ear
-    1, 3, 3, 1, 1, 1, // 
-    3, 3, 3, 1, 1, 1, // 
+    -1,3, 0, 1, 1, 1, //Left Ear
+    -2,1, 0, 1, 1, 1, // 
+    0, 1, 0, 1, 1, 1, // 
     //
-    2,5, 3, 1, 1, 1, //Right Ear
-    1, 3, 3, 1, 1, 1, // 
-    3, 3, 3, 1, 1, 1, // 
-    4,5, 3, 1, 1, 1, //Left Ear
-    3, 3, 3, 1, 1, 1, // 
-    5, 3, 3, 1, 1, 1, // 
+    1, 3, 0, 1, 1, 1, //Right Ear
+    0, 1, 0, 1, 1, 1, // 
+    2, 1, 0, 1, 1, 1, // 
   ]);
+
 
 
   initVertexBuffers(gl, vertices, vertices2);
@@ -299,7 +297,7 @@ function draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix) {
   var pyramidvec = glMatrix.vec3.fromValues(0,1,0);
 
   var rotateMatrix = glMatrix.mat4.create();
-  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_rotate');
+  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_trs');
   glMatrix.mat4.rotate(rotateMatrix, rotateMatrix, glMatrix.glMatrix.toRadian(currentAngle), pyramidvec);
   gl.uniformMatrix4fv(u_rotate_matrix, false, rotateMatrix);
 
@@ -307,11 +305,19 @@ function draw(gl, n, n2, currentAngle, projMatrix, u_mvp_matrix) {
   // Draw the rectangle
   gl.drawArrays(gl.TRIANGLES, 0, n);
 
-  var catvec = glMatrix.vec3.fromValues(1,1,0);
+  var rotvec = glMatrix.vec3.fromValues(0,1,0);
+  var transvec = glMatrix.vec3.fromValues(2,2,0);
   var rotateMatrix = glMatrix.mat4.create();
-  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_rotate');
-  glMatrix.mat4.rotate(rotateMatrix, rotateMatrix, glMatrix.glMatrix.toRadian(currentAngle), catvec);
-  gl.uniformMatrix4fv(u_rotate_matrix, false, rotateMatrix);
+
+  glMatrix.mat4.fromRotation(rotateMatrix, glMatrix.glMatrix.toRadian(currentAngle), rotvec);
+  var translateMatrix = glMatrix.mat4.create();
+  glMatrix.mat4.fromTranslation(translateMatrix, transvec);
+
+  var finalMatrix = glMatrix.mat4.create();
+  glMatrix.mat4.multiply(finalMatrix, translateMatrix, rotateMatrix)
+
+  var u_rotate_matrix = gl.getUniformLocation(gl.program, 'model_trs');
+  gl.uniformMatrix4fv(u_rotate_matrix, false, finalMatrix);
 
 
   
